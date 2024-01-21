@@ -1,0 +1,6 @@
+public
+.ipynb_checkpoints
+.DS_Store
+.netlify
+.quarto
+__pycache__

@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+help() {
+  cat <<EOF
+marimo edit a.py
+
+jupyter start
+jupyter deploy  
+EOF
+}
+
+jupyter="poetry run jupyter"
+marimo="poetry run marimo"
+quarto="poetry run quarto"
+
+main() {
+  case "$1" in
+    marimo ) shift; marimo_main "$@" ;;
+    jupyter ) shift; jupyter_main "$@" ;;
+    "" ) help ;;
+  esac
+}
+
+marimo_main() {
+  $marimo "$@"
+}
+
+jupyter_main() {
+  case "$1" in
+    start ) $jupyter lab ;;
+    deploy ) jupyter_deploy ;;
+  esac
+}
+
+jupyter_deploy() {
+  $quarto render Expense/Expense.ipynb --execute --output-dir ./public
+  netlify deploy --prod
+}
+
+main "$@"
+
