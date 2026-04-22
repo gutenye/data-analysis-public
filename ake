@@ -1,41 +1,28 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-help() {
-  cat <<EOF
+import { app, $ } from "@gutenye/script.js";
+
+const HELP = `
 marimo edit a.py
 
 jupyter start
-jupyter deploy  
-EOF
-}
+jupyter deploy
+`;
 
-jupyter="poetry run jupyter"
-marimo="poetry run marimo"
-quarto="poetry run quarto"
+app.help(HELP);
 
-main() {
-  case "$1" in
-    marimo ) shift; marimo_main "$@" ;;
-    jupyter ) shift; jupyter_main "$@" ;;
-    "" ) help ;;
-  esac
-}
+app
+  .cmd("marimo", "Run marimo")
+  .add("[...args]", "Args")
+  .add(async (args) => {
+    await $`poetry run marimo ${args}`;
+  });
 
-marimo_main() {
-  $marimo "$@"
-}
+app.cmd("jupyter start", "Start jupyter lab").add(async () => {
+  await $`poetry run jupyter lab`;
+});
 
-jupyter_main() {
-  case "$1" in
-    start ) $jupyter lab ;;
-    deploy ) jupyter_deploy ;;
-  esac
-}
-
-jupyter_deploy() {
-  $quarto render Expense/Expense.ipynb --execute --output-dir ./public
-  netlify deploy --prod
-}
-
-main "$@"
-
+app.cmd("jupyter deploy", "Deploy jupyter report").add(async () => {
+  await $`poetry run quarto render Expense/Expense.ipynb --execute --output-dir ./public`;
+  await $`netlify deploy --prod`;
+});
